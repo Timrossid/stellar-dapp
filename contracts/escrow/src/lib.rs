@@ -1,8 +1,7 @@
 #![no_std]
 
 use soroban_sdk::{
-    contract, contractimpl, contracttype, log, Address, Env, Symbol,
-    symbol_short, Vec,
+    contract, contractimpl, contracttype, log, symbol_short, Address, Env, Symbol, Vec,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -55,17 +54,27 @@ fn get_next_deal_id(e: &Env) -> u64 {
 }
 
 fn save_user_deal(e: &Env, user: &Address, deal_id: u64) {
-    let mut deals: Vec<u64> = e.storage().instance()
+    let mut deals: Vec<u64> = e
+        .storage()
+        .instance()
         .get(&DataKey::UserDeals(user.clone()))
         .unwrap_or(Vec::new(e));
     deals.push_back(deal_id);
-    e.storage().instance().set(&DataKey::UserDeals(user.clone()), &deals);
+    e.storage()
+        .instance()
+        .set(&DataKey::UserDeals(user.clone()), &deals);
 }
 
 fn emit_deal_event(e: &Env, topic: Symbol, deal: &Deal, extra: Option<i128>) {
     match extra {
-        Some(val) => e.events().publish((topic, deal.id, deal.seller.clone(), deal.buyer.clone(), val), (deal.clone(),)),
-        None => e.events().publish((topic, deal.id, deal.seller.clone(), deal.buyer.clone()), (deal.clone(),)),
+        Some(val) => e.events().publish(
+            (topic, deal.id, deal.seller.clone(), deal.buyer.clone(), val),
+            (deal.clone(),),
+        ),
+        None => e.events().publish(
+            (topic, deal.id, deal.seller.clone(), deal.buyer.clone()),
+            (deal.clone(),),
+        ),
     };
 }
 
@@ -78,9 +87,13 @@ impl Escrow {
         if e.storage().instance().has(&DataKey::FeeCollector) {
             panic!("already initialized");
         }
-        e.storage().instance().set(&DataKey::FeeCollector, &fee_collector);
+        e.storage()
+            .instance()
+            .set(&DataKey::FeeCollector, &fee_collector);
         e.storage().instance().set(&DataKey::FeeBps, &fee_bps);
-        e.storage().instance().set(&DataKey::TokenContract, &token_contract);
+        e.storage()
+            .instance()
+            .set(&DataKey::TokenContract, &token_contract);
         e.storage().instance().set(&DataKey::DealCount, &0u64);
     }
 
@@ -120,8 +133,14 @@ impl Escrow {
         save_user_deal(&e, &buyer, deal_id);
 
         emit_deal_event(&e, EVENT_DEAL_CREATED, &deal, None);
-        log!(&e, "Deal {} created: {} selling {} tokens to {}",
-            deal_id, seller, token_amount, buyer);
+        log!(
+            &e,
+            "Deal {} created: {} selling {} tokens to {}",
+            deal_id,
+            seller,
+            token_amount,
+            buyer
+        );
 
         deal_id
     }
@@ -129,7 +148,9 @@ impl Escrow {
     pub fn fund_deal(e: Env, deal_id: u64, buyer: Address) {
         buyer.require_auth();
 
-        let mut deal: Deal = e.storage().instance()
+        let mut deal: Deal = e
+            .storage()
+            .instance()
             .get(&DataKey::Deal(deal_id))
             .unwrap_or_else(|| panic!("deal not found"));
 
@@ -147,7 +168,13 @@ impl Escrow {
         let contract_addr = e.current_contract_address();
 
         token_client.transfer_from(&e, &buyer, &buyer, &contract_addr, deal.price);
-        token_client.transfer_from(&e, &deal.seller, &deal.seller, &contract_addr, deal.token_amount);
+        token_client.transfer_from(
+            &e,
+            &deal.seller,
+            &deal.seller,
+            &contract_addr,
+            deal.token_amount,
+        );
 
         deal.state = DealState::Funded;
         e.storage().instance().set(&DataKey::Deal(deal_id), &deal);
@@ -159,7 +186,9 @@ impl Escrow {
     pub fn release_deal(e: Env, deal_id: u64, caller: Address) {
         caller.require_auth();
 
-        let mut deal: Deal = e.storage().instance()
+        let mut deal: Deal = e
+            .storage()
+            .instance()
             .get(&DataKey::Deal(deal_id))
             .unwrap_or_else(|| panic!("deal not found"));
 
@@ -191,13 +220,21 @@ impl Escrow {
         e.storage().instance().set(&DataKey::Deal(deal_id), &deal);
 
         emit_deal_event(&e, EVENT_DEAL_RELEASED, &deal, Some(seller_payout));
-        log!(&e, "Deal {} released. Seller paid {}, fee {}", deal_id, seller_payout, fee_amount);
+        log!(
+            &e,
+            "Deal {} released. Seller paid {}, fee {}",
+            deal_id,
+            seller_payout,
+            fee_amount
+        );
     }
 
     pub fn cancel_deal(e: Env, deal_id: u64, caller: Address) {
         caller.require_auth();
 
-        let mut deal: Deal = e.storage().instance()
+        let mut deal: Deal = e
+            .storage()
+            .instance()
             .get(&DataKey::Deal(deal_id))
             .unwrap_or_else(|| panic!("deal not found"));
 
@@ -239,7 +276,9 @@ impl Escrow {
     pub fn dispute_deal(e: Env, deal_id: u64, caller: Address) {
         caller.require_auth();
 
-        let mut deal: Deal = e.storage().instance()
+        let mut deal: Deal = e
+            .storage()
+            .instance()
             .get(&DataKey::Deal(deal_id))
             .unwrap_or_else(|| panic!("deal not found"));
 
@@ -258,19 +297,26 @@ impl Escrow {
     }
 
     pub fn get_deal(e: Env, deal_id: u64) -> Deal {
-        e.storage().instance()
+        e.storage()
+            .instance()
             .get(&DataKey::Deal(deal_id))
             .unwrap_or_else(|| panic!("deal not found"))
     }
 
     pub fn get_user_deals(e: Env, user: Address) -> Vec<Deal> {
-        let deal_ids: Vec<u64> = e.storage().instance()
+        let deal_ids: Vec<u64> = e
+            .storage()
+            .instance()
             .get(&DataKey::UserDeals(user))
             .unwrap_or(Vec::new(&e));
 
         let mut deals: Vec<Deal> = Vec::new(&e);
         for i in 0..deal_ids.len() {
-            if let Some(deal) = e.storage().instance().get::<_, Deal>(&DataKey::Deal(deal_ids.get(i).unwrap())) {
+            if let Some(deal) = e
+                .storage()
+                .instance()
+                .get::<_, Deal>(&DataKey::Deal(deal_ids.get(i).unwrap()))
+            {
                 deals.push_back(deal);
             }
         }
@@ -300,11 +346,7 @@ mod token {
 
     fn call_transfer(e: &Env, contract_id: &Address, from: &Address, to: &Address, amount: i128) {
         let args: (Address, Address, i128) = (from.clone(), to.clone(), amount);
-        let _: () = e.invoke_contract(
-            contract_id,
-            &Symbol::new(e, "transfer"),
-            args.into_val(e),
-        );
+        let _: () = e.invoke_contract(contract_id, &Symbol::new(e, "transfer"), args.into_val(e));
     }
 
     fn call_transfer_from(
@@ -326,11 +368,7 @@ mod token {
 
     fn call_balance(e: &Env, contract_id: &Address, id: &Address) -> i128 {
         let args: (Address,) = (id.clone(),);
-        e.invoke_contract(
-            contract_id,
-            &Symbol::new(e, "balance"),
-            args.into_val(e),
-        )
+        e.invoke_contract(contract_id, &Symbol::new(e, "balance"), args.into_val(e))
     }
 
     pub struct TokenClient {

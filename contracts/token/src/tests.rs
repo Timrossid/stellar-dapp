@@ -11,7 +11,11 @@ fn test_initialize_and_basic_queries() {
     let contract_id = e.register_contract(None, AdvancedToken);
     let client = AdvancedTokenClient::new(&e, &contract_id);
 
-    client.initialize(&admin, &String::from_str(&e, "TestToken"), &String::from_str(&e, "TTK"));
+    client.initialize(
+        &admin,
+        &String::from_str(&e, "TestToken"),
+        &String::from_str(&e, "TTK"),
+    );
 
     assert_eq!(client.name(), String::from_str(&e, "TestToken"));
     assert_eq!(client.symbol(), String::from_str(&e, "TTK"));
@@ -30,7 +34,11 @@ fn test_mint_and_balance() {
     let contract_id = e.register_contract(None, AdvancedToken);
     let client = AdvancedTokenClient::new(&e, &contract_id);
 
-    client.initialize(&admin, &String::from_str(&e, "TestToken"), &String::from_str(&e, "TTK"));
+    client.initialize(
+        &admin,
+        &String::from_str(&e, "TestToken"),
+        &String::from_str(&e, "TTK"),
+    );
 
     client.mint(&user, &1000);
 
@@ -48,7 +56,11 @@ fn test_transfer() {
     let contract_id = e.register_contract(None, AdvancedToken);
     let client = AdvancedTokenClient::new(&e, &contract_id);
 
-    client.initialize(&admin, &String::from_str(&e, "TestToken"), &String::from_str(&e, "TTK"));
+    client.initialize(
+        &admin,
+        &String::from_str(&e, "TestToken"),
+        &String::from_str(&e, "TTK"),
+    );
     client.mint(&alice, &500);
 
     client.transfer(&alice, &bob, &200);
@@ -68,7 +80,11 @@ fn test_approve_and_transfer_from() {
     let contract_id = e.register_contract(None, AdvancedToken);
     let client = AdvancedTokenClient::new(&e, &contract_id);
 
-    client.initialize(&admin, &String::from_str(&e, "TestToken"), &String::from_str(&e, "TTK"));
+    client.initialize(
+        &admin,
+        &String::from_str(&e, "TestToken"),
+        &String::from_str(&e, "TTK"),
+    );
     client.mint(&alice, &1000);
 
     client.approve(&alice, &bob, &300, &100000);
@@ -90,7 +106,11 @@ fn test_burn() {
     let contract_id = e.register_contract(None, AdvancedToken);
     let client = AdvancedTokenClient::new(&e, &contract_id);
 
-    client.initialize(&admin, &String::from_str(&e, "TestToken"), &String::from_str(&e, "TTK"));
+    client.initialize(
+        &admin,
+        &String::from_str(&e, "TestToken"),
+        &String::from_str(&e, "TTK"),
+    );
     client.mint(&user, &500);
 
     client.burn(&user, &200);
@@ -108,14 +128,25 @@ fn test_vesting_schedule() {
     let contract_id = e.register_contract(None, AdvancedToken);
     let client = AdvancedTokenClient::new(&e, &contract_id);
 
-    client.initialize(&admin, &String::from_str(&e, "TestToken"), &String::from_str(&e, "TTK"));
+    client.initialize(
+        &admin,
+        &String::from_str(&e, "TestToken"),
+        &String::from_str(&e, "TTK"),
+    );
     client.mint(&admin, &10000);
 
     let start_time = e.ledger().timestamp();
     let duration: u64 = 1000;
     let cliff_duration: u64 = 100;
 
-    client.create_vesting_schedule(&admin, &beneficiary, &5000, &start_time, &duration, &cliff_duration);
+    client.create_vesting_schedule(
+        &admin,
+        &beneficiary,
+        &5000,
+        &start_time,
+        &duration,
+        &cliff_duration,
+    );
 
     let schedule = client.get_vesting_schedule(&beneficiary);
     assert_eq!(schedule.total_amount, 5000);
@@ -141,7 +172,11 @@ fn test_pause_functionality() {
     let contract_id = e.register_contract(None, AdvancedToken);
     let client = AdvancedTokenClient::new(&e, &contract_id);
 
-    client.initialize(&admin, &String::from_str(&e, "TestToken"), &String::from_str(&e, "TTK"));
+    client.initialize(
+        &admin,
+        &String::from_str(&e, "TestToken"),
+        &String::from_str(&e, "TTK"),
+    );
     client.mint(&user, &500);
 
     client.set_paused(&true);
@@ -157,7 +192,11 @@ fn test_pause_prevents_transfers() {
     let contract_id = e.register_contract(None, AdvancedToken);
     let client = AdvancedTokenClient::new(&e, &contract_id);
 
-    client.initialize(&admin, &String::from_str(&e, "TestToken"), &String::from_str(&e, "TTK"));
+    client.initialize(
+        &admin,
+        &String::from_str(&e, "TestToken"),
+        &String::from_str(&e, "TTK"),
+    );
     client.mint(&user, &500);
 
     let before = client.balance(&user);

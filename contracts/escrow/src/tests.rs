@@ -4,12 +4,23 @@ use super::*;
 use soroban_sdk::{testutils::Address as _, vec, Env, String};
 
 fn create_token(e: &Env, admin: &Address) -> Address {
-    let stellar_token = stellar_token::AdvancedTokenClient::new(e, &e.register_contract(None, stellar_token::AdvancedToken));
-    stellar_token.initialize(admin, &String::from_str(e, "EscrowToken"), &String::from_str(e, "ESC"));
+    let stellar_token = stellar_token::AdvancedTokenClient::new(
+        e,
+        &e.register_contract(None, stellar_token::AdvancedToken),
+    );
+    stellar_token.initialize(
+        admin,
+        &String::from_str(e, "EscrowToken"),
+        &String::from_str(e, "ESC"),
+    );
     stellar_token.contract_id.clone()
 }
 
-fn create_escrow(e: &Env, fee_collector: &Address, token_contract: &Address) -> (Address, EscrowClient) {
+fn create_escrow(
+    e: &Env,
+    fee_collector: &Address,
+    token_contract: &Address,
+) -> (Address, EscrowClient) {
     let escrow_id = e.register_contract(None, Escrow);
     let escrow_client = EscrowClient::new(e, &escrow_id);
     escrow_client.initialize(fee_collector, &25u32, token_contract);
