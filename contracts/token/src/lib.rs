@@ -46,14 +46,13 @@ const EVENT_PAUSED: Symbol = symbol_short!("pause");
 const EVENT_UNPAUSED: Symbol = symbol_short!("unpause");
 
 fn check_not_paused(e: &Env) {
-    if e.storage().instance().has(&DataKey::Paused) {
-        if e.storage()
+    if e.storage().instance().has(&DataKey::Paused)
+        && e.storage()
             .instance()
             .get(&DataKey::Paused)
             .unwrap_or(false)
-        {
-            panic!("contract is paused");
-        }
+    {
+        panic!("contract is paused");
     }
 }
 
