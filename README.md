@@ -45,7 +45,7 @@ stellar-dapp/
 ## Prerequisites
 
 - [Rust](https://rustup.rs/) with `wasm32-unknown-unknown` target
-- [Soroban CLI](https://soroban.stellar.org/docs/getting-started/setup)
+- [Stellar CLI](https://developers.stellar.org/docs/tools/cli) (`winget install --id Stellar.StellarCLI`)
 - [Node.js](https://nodejs.org/) 18+
 - [Freighter Wallet](https://freighter.app/) browser extension
 
@@ -83,13 +83,11 @@ cd contracts/escrow && cargo test
 ### 4. Deploy contracts
 
 ```bash
-# Set environment variables
-export SOROBAN_SECRET_KEY="your_private_key"
-export ADMIN_PUBLIC_KEY="your_public_key"
-export FEE_COLLECTOR="fee_collector_address"
+# Generate and fund a key
+stellar keys generate admin --fund --as-secret
 
-# Deploy to testnet
-node scripts/deploy.mjs testnet
+# Deploy to testnet (see scripts/deploy.mjs)
+# Or follow CI/CD workflow in GitHub Actions
 ```
 
 ### 5. Start frontend
@@ -103,8 +101,8 @@ npm run dev           # http://localhost:3000
 ## Environment Variables
 
 ```env
-VITE_TOKEN_CONTRACT=CCY3T...
-VITE_ESCROW_CONTRACT=CCZ4T...
+VITE_TOKEN_CONTRACT=CD3XCFUQPRNGAN7E2R6Q4DQ4YH3VN4J5SRSU7TNVKP5EFS5DU52B7OVJ
+VITE_ESCROW_CONTRACT=CCZ7RV4YSGZ6JCXYGFVYY5G5BIBMI5YLRKKK4WKHYPLODK7CMKBQYO2N
 VITE_RPC_URL=https://soroban-testnet.stellar.org
 VITE_NETWORK_PASSPHRASE=Test SDF Network ; September 2025
 ```
@@ -178,9 +176,14 @@ cargo test -- --nocapture
 cargo test test_fund_and_release_deal -- --nocapture
 ```
 
-## Demo
+## Deployed Contracts (Testnet)
 
-- **Live App**: https://stellar-escrow-dapp.vercel.app
-- **Demo Video**: https://youtu.be/your-video
-- **Token Contract**: `CCY3T...` (testnet)
-- **Escrow Contract**: `CCZ4T...` (testnet)
+| Contract | Address | Explorer |
+|----------|---------|----------|
+| Token | `CD3XCFUQPRNGAN7E2R6Q4DQ4YH3VN4J5SRSU7TNVKP5EFS5DU52B7OVJ` | [Lab](https://lab.stellar.org/r/testnet/contract/CD3XCFUQPRNGAN7E2R6Q4DQ4YH3VN4J5SRSU7TNVKP5EFS5DU52B7OVJ) |
+| Escrow | `CCZ7RV4YSGZ6JCXYGFVYY5G5BIBMI5YLRKKK4WKHYPLODK7CMKBQYO2N` | [Lab](https://lab.stellar.org/r/testnet/contract/CCZ7RV4YSGZ6JCXYGFVYY5G5BIBMI5YLRKKK4WKHYPLODK7CMKBQYO2N) |
+
+- **Admin**: `GB77YH2JRPE4JY56H2YYWAQYCMSX4YE3MEJFJ6VONBYYRJHXGMYPGPFY` (testnet)
+- **GitHub**: https://github.com/Timrossid/stellar-dapp
+- **Live App**: *(set up Vercel deployment)*
+- **Demo Video**: *(record and add link)*
