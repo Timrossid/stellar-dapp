@@ -1,0 +1,11 @@
+{
+  "name": "stellar-dapp",
+  "private": true,
+  "scripts": {
+    "frontend:dev": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build",
+    "contracts:build": "cargo build --target wasm32-unknown-unknown --release",
+    "contracts:test": "cargo test",
+    "deploy": "node scripts/deploy.mjs"
+  }
+}

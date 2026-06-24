@@ -1,0 +1,105 @@
+name: Contract Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Stellar Network'
+        required: true
+        default: 'testnet'
+        type: choice
+        options:
+          - testnet
+          - mainnet
+
+jobs:
+  deploy-contracts:
+    name: Deploy Contracts to ${{ github.event.inputs.network }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: wasm32-unknown-unknown
+
+      - name: Install Soroban CLI
+        run: cargo install soroban-cli --locked
+
+      - name: Build contracts
+        run: |
+          cd contracts/token && cargo build --target wasm32-unknown-unknown --release
+          cd ../escrow && cargo build --target wasm32-unknown-unknown --release
+
+      - name: Deploy token contract
+        env:
+          SOROBAN_RPC_URL: ${{ secrets.SOROBAN_RPC_URL }}
+          SOROBAN_NETWORK_PASSPHRASE: ${{ secrets.SOROBAN_NETWORK_PASSPHRASE }}
+          SOROBAN_SECRET_KEY: ${{ secrets.SOROBAN_SECRET_KEY }}
+        run: |
+          TOKEN_WASM="contracts/token/target/wasm32-unknown-unknown/release/stellar_token.wasm"
+          TOKEN_ID=$(soroban contract deploy \
+            --wasm $TOKEN_WASM \
+            --rpc-url $SOROBAN_RPC_URL \
+            --network-passphrase "$SOROBAN_NETWORK_PASSPHRASE" \
+            --source-account $SOROBAN_SECRET_KEY)
+          echo "TOKEN_CONTRACT_ID=$TOKEN_ID" >> $GITHUB_ENV
+
+      - name: Deploy escrow contract
+        env:
+          SOROBAN_RPC_URL: ${{ secrets.SOROBAN_RPC_URL }}
+          SOROBAN_NETWORK_PASSPHRASE: ${{ secrets.SOROBAN_NETWORK_PASSPHRASE }}
+          SOROBAN_SECRET_KEY: ${{ secrets.SOROBAN_SECRET_KEY }}
+        run: |
+          ESCROW_WASM="contracts/escrow/target/wasm32-unknown-unknown/release/stellar_escrow.wasm"
+          ESCROW_ID=$(soroban contract deploy \
+            --wasm $ESCROW_WASM \
+            --rpc-url $SOROBAN_RPC_URL \
+            --network-passphrase "$SOROBAN_NETWORK_PASSPHRASE" \
+            --source-account $SOROBAN_SECRET_KEY)
+          echo "ESCROW_CONTRACT_ID=$ESCROW_ID" >> $GITHUB_ENV
+
+      - name: Initialize token contract
+        env:
+          SOROBAN_RPC_URL: ${{ secrets.SOROBAN_RPC_URL }}
+          SOROBAN_NETWORK_PASSPHRASE: ${{ secrets.SOROBAN_NETWORK_PASSPHRASE }}
+          SOROBAN_SECRET_KEY: ${{ secrets.SOROBAN_SECRET_KEY }}
+          ADMIN_PUBLIC_KEY: ${{ secrets.ADMIN_PUBLIC_KEY }}
+        run: |
+          soroban contract invoke \
+            --id $TOKEN_CONTRACT_ID \
+            --rpc-url $SOROBAN_RPC_URL \
+            --network-passphrase "$SOROBAN_NETWORK_PASSPHRASE" \
+            --source-account $SOROBAN_SECRET_KEY \
+            -- \
+            initialize \
+            --admin $ADMIN_PUBLIC_KEY \
+            --name '"StellarEscrowToken"' \
+            --symbol '"SET"'
+
+      - name: Initialize escrow contract
+        env:
+          SOROBAN_RPC_URL: ${{ secrets.SOROBAN_RPC_URL }}
+          SOROBAN_NETWORK_PASSPHRASE: ${{ secrets.SOROBAN_NETWORK_PASSPHRASE }}
+          SOROBAN_SECRET_KEY: ${{ secrets.SOROBAN_SECRET_KEY }}
+          FEE_COLLECTOR: ${{ secrets.FEE_COLLECTOR }}
+        run: |
+          soroban contract invoke \
+            --id $ESCROW_CONTRACT_ID \
+            --rpc-url $SOROBAN_RPC_URL \
+            --network-passphrase "$SOROBAN_NETWORK_PASSPHRASE" \
+            --source-account $SOROBAN_SECRET_KEY \
+            -- \
+            initialize \
+            --fee_collector $FEE_COLLECTOR \
+            --fee_bps 25 \
+            --token_contract $TOKEN_CONTRACT_ID
+
+      - name: Output contract addresses
+        run: |
+          echo "## Contract Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Contract | Address |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Token | \`$TOKEN_CONTRACT_ID\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Escrow | \`$ESCROW_CONTRACT_ID\` |" >> $GITHUB_STEP_SUMMARY
