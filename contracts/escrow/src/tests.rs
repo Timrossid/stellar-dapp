@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use super::*;
-use soroban_sdk::{testutils::Address as _, vec, Env, String};
+use soroban_sdk::{testutils::Address as _, Env, String};
 
 fn create_token(e: &Env, admin: &Address) -> Address {
     let stellar_token = stellar_token::AdvancedTokenClient::new(
@@ -16,11 +16,11 @@ fn create_token(e: &Env, admin: &Address) -> Address {
     stellar_token.contract_id.clone()
 }
 
-fn create_escrow(
-    e: &Env,
+fn create_escrow<'a>(
+    e: &'a Env,
     fee_collector: &Address,
     token_contract: &Address,
-) -> (Address, EscrowClient) {
+) -> (Address, EscrowClient<'a>) {
     let escrow_id = e.register_contract(None, Escrow);
     let escrow_client = EscrowClient::new(e, &escrow_id);
     escrow_client.initialize(fee_collector, &25u32, token_contract);
@@ -40,6 +40,7 @@ fn approve_tokens(e: &Env, token_id: &Address, owner: &Address, spender: &Addres
 #[test]
 fn test_create_deal() {
     let e = Env::default();
+    e.mock_all_auths();
     let admin = Address::generate(&e);
     let seller = Address::generate(&e);
     let buyer = Address::generate(&e);
@@ -72,6 +73,7 @@ fn test_create_deal() {
 #[test]
 fn test_fund_and_release_deal() {
     let e = Env::default();
+    e.mock_all_auths();
     let admin = Address::generate(&e);
     let seller = Address::generate(&e);
     let buyer = Address::generate(&e);
@@ -120,6 +122,7 @@ fn test_fund_and_release_deal() {
 #[test]
 fn test_cancel_pending_deal() {
     let e = Env::default();
+    e.mock_all_auths();
     let admin = Address::generate(&e);
     let seller = Address::generate(&e);
     let buyer = Address::generate(&e);
@@ -148,6 +151,7 @@ fn test_cancel_pending_deal() {
 #[test]
 fn test_dispute_deal() {
     let e = Env::default();
+    e.mock_all_auths();
     let admin = Address::generate(&e);
     let seller = Address::generate(&e);
     let buyer = Address::generate(&e);
@@ -181,6 +185,7 @@ fn test_dispute_deal() {
 #[test]
 fn test_multiple_deals_per_user() {
     let e = Env::default();
+    e.mock_all_auths();
     let admin = Address::generate(&e);
     let seller = Address::generate(&e);
     let buyer = Address::generate(&e);
