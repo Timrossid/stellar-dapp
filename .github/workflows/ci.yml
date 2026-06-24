@@ -47,11 +47,11 @@ jobs:
         working-directory: contracts/escrow
 
       - name: Run token contract tests
-        run: cargo test
+        run: cargo test --features testutils
         working-directory: contracts/token
 
       - name: Run escrow contract tests
-        run: cargo test
+        run: cargo test --features testutils
         working-directory: contracts/escrow
 
   frontend-build:
