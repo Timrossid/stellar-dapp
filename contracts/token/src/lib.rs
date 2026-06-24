@@ -138,8 +138,6 @@ impl AdvancedToken {
             panic!("amount must be positive");
         }
 
-        to.require_auth();
-
         let mut balance = e
             .storage()
             .instance()
