@@ -6,6 +6,7 @@ use soroban_sdk::{testutils::Address as _, testutils::Ledger as _, Env, String};
 #[test]
 fn test_initialize_and_basic_queries() {
     let e = Env::default();
+    e.mock_all_auths();
     let admin = Address::generate(&e);
 
     let contract_id = e.register_contract(None, AdvancedToken);
@@ -28,6 +29,7 @@ fn test_initialize_and_basic_queries() {
 #[test]
 fn test_mint_and_balance() {
     let e = Env::default();
+    e.mock_all_auths();
     let admin = Address::generate(&e);
     let user = Address::generate(&e);
 
@@ -49,6 +51,7 @@ fn test_mint_and_balance() {
 #[test]
 fn test_transfer() {
     let e = Env::default();
+    e.mock_all_auths();
     let admin = Address::generate(&e);
     let alice = Address::generate(&e);
     let bob = Address::generate(&e);
@@ -72,6 +75,7 @@ fn test_transfer() {
 #[test]
 fn test_approve_and_transfer_from() {
     let e = Env::default();
+    e.mock_all_auths();
     let admin = Address::generate(&e);
     let alice = Address::generate(&e);
     let bob = Address::generate(&e);
@@ -100,6 +104,7 @@ fn test_approve_and_transfer_from() {
 #[test]
 fn test_burn() {
     let e = Env::default();
+    e.mock_all_auths();
     let admin = Address::generate(&e);
     let user = Address::generate(&e);
 
@@ -122,6 +127,7 @@ fn test_burn() {
 #[test]
 fn test_vesting_schedule() {
     let e = Env::default();
+    e.mock_all_auths();
     let admin = Address::generate(&e);
     let beneficiary = Address::generate(&e);
 
@@ -166,6 +172,7 @@ fn test_vesting_schedule() {
 #[test]
 fn test_pause_functionality() {
     let e = Env::default();
+    e.mock_all_auths();
     let admin = Address::generate(&e);
     let user = Address::generate(&e);
 
@@ -186,6 +193,7 @@ fn test_pause_functionality() {
 #[test]
 fn test_pause_prevents_transfers() {
     let e = Env::default();
+    e.mock_all_auths();
     let admin = Address::generate(&e);
     let user = Address::generate(&e);
 
