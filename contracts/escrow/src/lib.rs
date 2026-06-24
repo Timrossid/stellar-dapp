@@ -167,10 +167,10 @@ impl Escrow {
         let token_client = crate::token::TokenClient::new(deal.token_contract.clone());
         let contract_addr = e.current_contract_address();
 
-        token_client.transfer_from(&e, &buyer, &buyer, &contract_addr, deal.price);
+        token_client.transfer_from(&e, &contract_addr, &buyer, &contract_addr, deal.price);
         token_client.transfer_from(
             &e,
-            &deal.seller,
+            &contract_addr,
             &deal.seller,
             &contract_addr,
             deal.token_amount,
