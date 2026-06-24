@@ -266,6 +266,14 @@ Total: 13/13 tests passed (100%)
    npm run build
    ```
 
+## 🖼️ Visual Evidence (Screenshots)
+
+- **Live App (Mobile)**: [screenshots/01_LIVE_APP_MOBILE.png](./screenshots/01_LIVE_APP_MOBILE.png)
+- **Live App (Desktop)**: [screenshots/01_LIVE_APP_DESKTOP.png](./screenshots/01_LIVE_APP_DESKTOP.png)
+- **CI/CD Pipeline**: [screenshots/02_CI_PIPELINE.png](./screenshots/02_CI_PIPELINE.png)
+- **Test Output**: [screenshots/03_TEST_OUTPUT.png](./screenshots/03_TEST_OUTPUT.png)
+- **Responsive Design Chart**: [screenshots/04_RESPONSIVE_DESIGN.png](./screenshots/04_RESPONSIVE_DESIGN.png)
+
 ---
 
 ## 🎬 Demo Video
