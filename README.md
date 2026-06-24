@@ -186,5 +186,5 @@ cargo test test_fund_and_release_deal -- --nocapture
 - **Admin**: `GB77YH2JRPE4JY56H2YYWAQYCMSX4YE3MEJFJ6VONBYYRJHXGMYPGPFY` (testnet)
 - **GitHub**: https://github.com/Timrossid/stellar-dapp
 - **Live App**: https://stellar-escrow-dapp-two.vercel.app
-- **Demo Video**: *(recording in progress)*
+- **Demo Video**: [Watch Demo](./demo_video.mp4)
 - **Submission**: See [SUBMISSION.md](./SUBMISSION.md)

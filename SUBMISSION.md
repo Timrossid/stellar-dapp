@@ -278,16 +278,15 @@ Total: 13/13 tests passed (100%)
 
 ## 🎬 Demo Video
 
-**Status**: Recording in progress  
-**Format**: Screen recording (1-2 minutes)  
+**Status**: ✅ Completed  
+**Format**: MP4 (Silent with Captions)  
+**Link**: [demo_video.mp4](./demo_video.mp4)  
 **Content**:
 - Live app walkthrough (https://stellar-escrow-dapp-two.vercel.app)
 - Mobile responsiveness demonstration
 - CI/CD pipeline showing all tests passing
 - Contract interaction examples (create deal, fund, release)
 - Error handling and edge cases
-
-*Link to be added upon completion*
 
 ---
 
