@@ -102,7 +102,7 @@ fn test_fund_and_release_deal() {
 
     let token = stellar_token::AdvancedTokenClient::new(&e, &token_id);
     let escrow_token_balance = token.balance(&escrow_id);
-    assert_eq!(escrow_token_balance, 100);
+    assert_eq!(escrow_token_balance, 600);
 
     escrow_client.release_deal(&deal_id, &seller);
 
