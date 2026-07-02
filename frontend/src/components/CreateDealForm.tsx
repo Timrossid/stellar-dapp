@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { useContractWrite } from '../hooks/useContract';
+import { useWallet } from '../hooks/useWallet';
+import { Address, nativeToScVal } from '@stellar/stellar-sdk';
 
 interface CreateDealFormProps {
   userAddress: string;
@@ -23,6 +26,9 @@ export function CreateDealForm({ escrowId, tokenContract, onDealCreated }: Creat
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { write, isPending, error: writeError } = useContractWrite();
+  const { address, signTransaction } = useWallet();
 
   const handleChange = (field: keyof FormData) => (
     e: React.ChangeEvent<HTMLInputElement>
@@ -53,17 +59,36 @@ export function CreateDealForm({ escrowId, tokenContract, onDealCreated }: Creat
       const expiresInSeconds = parseInt(form.expiresInDays) * 86400;
       const expiresAt = Math.floor(Date.now() / 1000) + expiresInSeconds;
 
-      // In a real app, this would call the contract
-      console.log('Creating deal:', {
-        escrowId,
-        tokenContract,
-        tokenAmount,
-        price,
-        buyer: form.buyer,
-        expiresAt,
-      });
+      if (!address) {
+        throw new Error('Please connect your wallet first');
+      }
 
-      onDealCreated(1);
+      // Arguments for create_deal:
+      // seller, buyer, token_contract, token_amount, price, expires_at
+      const args = [
+        new Address(address).toScVal(),
+        new Address(form.buyer).toScVal(),
+        new Address(tokenContract).toScVal(),
+        nativeToScVal(tokenAmount, { type: 'u64' }),
+        nativeToScVal(price, { type: 'u64' }),
+        nativeToScVal(expiresAt, { type: 'u64' }),
+      ];
+
+      const wrappedSignTransaction = async (xdr: string) => {
+        const result = await signTransaction(xdr);
+        return result.signedTxXdr;
+      };
+
+      await write(
+        escrowId,
+        'create_deal',
+        args,
+        address,
+        import.meta.env.VITE_NETWORK_PASSPHRASE,
+        wrappedSignTransaction
+      );
+
+      onDealCreated(1); // In a real app, we'd get the real deal ID from the transaction result
       setForm({
         buyer: '',
         tokenAmount: '',
@@ -76,6 +101,8 @@ export function CreateDealForm({ escrowId, tokenContract, onDealCreated }: Creat
       setIsSubmitting(false);
     }
   };
+
+  const displayError = writeError || error;
 
   return (
     <form className="create-deal-form" onSubmit={handleSubmit}>
@@ -132,14 +159,14 @@ export function CreateDealForm({ escrowId, tokenContract, onDealCreated }: Creat
         />
       </div>
 
-      {error && <p className="error-text">{error}</p>}
+      {displayError && <p className="error-text">{displayError}</p>}
 
       <button
         className="btn btn-primary"
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || isPending}
       >
-        {isSubmitting ? 'Creating...' : 'Create Deal'}
+        {isSubmitting || isPending ? 'Creating...' : 'Create Deal'}
       </button>
     </form>
   );

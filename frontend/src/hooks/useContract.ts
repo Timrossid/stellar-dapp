@@ -44,15 +44,16 @@ export function useContractWrite() {
       contractId: string,
       method: string,
       args: any[],
-      _source: string,
-      _signTx: (xdr: string) => Promise<string>
+      account: string,
+      networkPassphrase: string,
+      signTx: (xdr: string) => Promise<string>
     ) => {
       setIsPending(true);
       setError(null);
       const client = new ContractClient(contractId);
 
       try {
-        const result = await client.call(method, args);
+        const result = await client.send(method, args, account, networkPassphrase, signTx);
         setIsPending(false);
         return result;
       } catch (error) {
